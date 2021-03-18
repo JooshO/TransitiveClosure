@@ -165,17 +165,10 @@ public class Main extends Application {
                     // if there is a path from node i to k and from node k  to j
                     // then there is a path from i to j, so we set i, j to 1
                     if (matrix[i][k] == 1 && matrix[k][j] == 1) matrix1[i][j] = 1;
-
-                    // otherwise, copy over the previous value TODO: potentially unneeded
-                    else matrix1[i][j] = matrix[i][j];
                 }
             }
         }
 
-        // if we hadn't made any changes on our previous pass through, the closure is complete
-        if (Arrays.equals(matrix, matrix1)) return matrix;
-
-        // otherwise, we recurse, passing in the new matrix to get the closure
-        else return computeClosure(matrix1);
+        return matrix;
     }
 }
