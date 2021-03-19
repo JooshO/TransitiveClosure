@@ -55,7 +55,7 @@ public class Main extends Application {
                 // finally, invoke the method to get the number of rows and create an array
                 int numRows = (int) method.invoke(grid);
                 for (int i = 0; i < numRows; i++) {
-                    TextField n = (TextField) getNodeFromGridPane(grid, i, i);
+                    TextField n = (TextField) getNodeFromGridPane(grid, i, i, numRows);
                     n.setText(1 + "");
                 }
 
@@ -86,7 +86,7 @@ public class Main extends Application {
                 // read off every TextField into the matrix
                 for(int y = 0; y < matrix.length; y++) {
                     for (int x = 0; x < matrix.length; x++) {
-                        TextField n = (TextField) getNodeFromGridPane(grid, y, x);
+                        TextField n = (TextField) getNodeFromGridPane(grid, y, x, matrix.length);
                         matrix[x][y] = Integer.parseInt(n.getText());
                     }
                 }
@@ -97,7 +97,7 @@ public class Main extends Application {
                 // set every node in the GridPane to match the closure
                 for(int y = 0; y < matrix.length; y++) {
                     for (int x = 0; x < matrix.length; x++) {
-                        TextField n = (TextField) getNodeFromGridPane(grid, y, x);
+                        TextField n = (TextField) getNodeFromGridPane(grid, y, x, matrix.length);
                         n.setText(out[x][y] + "");
                     }
                 }
@@ -130,7 +130,7 @@ public class Main extends Application {
                 // read off every TextField into the matrix
                 for(int y = 0; y < matrix.length; y++) {
                     for (int x = 0; x < matrix.length; x++) {
-                        TextField n = (TextField) getNodeFromGridPane(grid, y, x);
+                        TextField n = (TextField) getNodeFromGridPane(grid, y, x, matrix.length);
                         matrix[x][y] = Integer.parseInt(n.getText());
                     }
                 }
@@ -144,7 +144,7 @@ public class Main extends Application {
                 // set every node in the GridPane to match the closure
                 for(int y = 0; y < matrix.length; y++) {
                     for (int x = 0; x < matrix.length; x++) {
-                        TextField n = (TextField) getNodeFromGridPane(grid, y, x);
+                        TextField n = (TextField) getNodeFromGridPane(grid, y, x, matrix.length);
                         n.setText(matrix[x][y] + "");
                     }
                 }
@@ -173,12 +173,24 @@ public class Main extends Application {
 
     /**
      * A helper method to retrieve the node a a given column and row
-     * TODO: Currently pretty inefficient, try to improve
+     * @param gridPane The GridPane to retrieve a node from
+     * @param col Target column
+     * @param row Target row
+     * @param size The width of the GridPane in tiles
+     * @return The node representing the GridPane
+     */
+    private Node getNodeFromGridPane(GridPane gridPane, int col, int row, int size) {
+        return gridPane.getChildren().get(row* size + col);
+    }
+
+    /**
+     * A helper method to retrieve the node a a given column and row
      * @param gridPane The GridPane to retrieve a node from
      * @param col Target column
      * @param row Target row
      * @return The node representing the GridPane
      */
+    @Deprecated
     private Node getNodeFromGridPane(GridPane gridPane, int col, int row) {
         // for each node in the GridPane, if it matches the row and col return it
         for (Node node : gridPane.getChildren()) {
