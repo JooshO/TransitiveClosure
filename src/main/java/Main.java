@@ -6,6 +6,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 import java.lang.reflect.InvocationTargetException;
@@ -37,9 +38,35 @@ public class Main extends Application {
         matrixSize.setOnAction(event -> outer.setCenter(createInputGrid(Integer.parseInt(matrixSize.getText()))));
         outer.setLeft(matrixSize);
 
+        VBox rightButtonBox = new VBox();
+
+        Button reflexiveClosure = new Button("Calculate Reflexive Closure");
+        reflexiveClosure.setOnAction(event -> {
+            // grab the GridPane and cast it
+            GridPane grid = (GridPane) outer.getCenter();
+
+            try {
+                // Create a Method by accessing the GridPane class and getting the private method "getNumberOfRows()"
+                Method method = grid.getClass().getDeclaredMethod("getNumberOfRows");
+
+                // then force that method to be accessible instead of being private
+                method.setAccessible(true);
+
+                // finally, invoke the method to get the number of rows and create an array
+                int numRows = (int) method.invoke(grid);
+                for (int i = 0; i < numRows; i++) {
+                    TextField n = (TextField) getNodeFromGridPane(grid, i, i);
+                    n.setText(1 + "");
+                }
+
+            } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+                e.printStackTrace();
+            }
+        });
+
         // create the button to generate the closure
-        Button button = new Button("Calculate Closure");
-        button.setOnAction(event -> {
+        Button transitiveClosure = new Button("Calculate Transitive Closure");
+        transitiveClosure.setOnAction(event -> {
             // grab the GridPane and cast it
             GridPane grid = (GridPane) outer.getCenter();
 
@@ -65,7 +92,7 @@ public class Main extends Application {
                 }
 
                 // compute the closure
-                int[][] out = computeClosure(matrix);
+                int[][] out = computeTransitiveClosure(matrix);
 
                 // set every node in the GridPane to match the closure
                 for(int y = 0; y < matrix.length; y++) {
@@ -80,7 +107,59 @@ public class Main extends Application {
             }
 
         });
-        outer.setRight(button);
+
+        // create the button to generate the closure
+        Button symmetricClosure = new Button("Calculate Symmetric Closure");
+        symmetricClosure.setOnAction(event -> {
+            // grab the GridPane and cast it
+            GridPane grid = (GridPane) outer.getCenter();
+
+            // What follows here is evil, hacky, anti-oob Java mess
+            // Basically, we work around private methods to get the number of rows and create an array with that number
+            try {
+                // Create a Method by accessing the GridPane class and getting the private method "getNumberOfRows()"
+                Method method = grid.getClass().getDeclaredMethod("getNumberOfRows");
+
+                // then force that method to be accessible instead of being private
+                method.setAccessible(true);
+
+                // finally, invoke the method to get the number of rows and create an array
+                int numRows = (int) method.invoke(grid);
+                int[][] matrix = new int[numRows][numRows];
+
+                // read off every TextField into the matrix
+                for(int y = 0; y < matrix.length; y++) {
+                    for (int x = 0; x < matrix.length; x++) {
+                        TextField n = (TextField) getNodeFromGridPane(grid, y, x);
+                        matrix[x][y] = Integer.parseInt(n.getText());
+                    }
+                }
+
+                for(int y = 0; y < matrix.length; y++) {
+                    for (int x = 0; x < matrix.length; x++) {
+                        if (matrix[x][y] == 1) matrix[y][x] = 1;
+                    }
+                }
+
+                // set every node in the GridPane to match the closure
+                for(int y = 0; y < matrix.length; y++) {
+                    for (int x = 0; x < matrix.length; x++) {
+                        TextField n = (TextField) getNodeFromGridPane(grid, y, x);
+                        n.setText(matrix[x][y] + "");
+                    }
+                }
+
+            } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+                e.printStackTrace();
+            }
+
+        });
+
+        // put all the buttons in the button box
+        rightButtonBox.getChildren().add(symmetricClosure);
+        rightButtonBox.getChildren().add(reflexiveClosure);
+        rightButtonBox.getChildren().add(transitiveClosure);
+        outer.setRight(rightButtonBox);
 
         // create a 3x3 grid to start off with and put it in the center
         outer.setCenter(createInputGrid(3));
@@ -152,7 +231,7 @@ public class Main extends Application {
      * @param matrix The input matrix of relations
      * @return The transitive closure of that matrix
      */
-    public static int[][] computeClosure(int[][] matrix) {
+    public static int[][] computeTransitiveClosure(int[][] matrix) {
         // grab the matrix length to avoid calling matrix.length over and over
         int n = matrix.length;
 
@@ -169,6 +248,6 @@ public class Main extends Application {
             }
         }
 
-        return matrix;
+        return matrix1;
     }
 }
